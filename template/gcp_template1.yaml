@@ -1,0 +1,38 @@
+resources:
+# Create a custom network
+- name: <<network TO BE CHANGED>>
+  type: compute.v1.network
+  properties:
+    autoCreateSubnetworks: false
+    routingConfig:
+      routingMode: REGIONAL
+    description: A custom network for our VM
+
+# Create a subnetwork
+- name: <<subnetwork TO BE CHANGED>>
+  type: compute.v1.subnetwork
+  properties:
+    ipCidrRange: 10.0.0.0/16
+    region: <<REGION>>
+    network: $(ref.<<network TO BE CHANGED>>.selfLink)
+
+# Create a VM within the custom subnetwork
+- name: <<TO BE CHANGED>>
+  type: compute.v1.instance
+  properties:
+    zone: <<ZONE>>
+    machineType: zones/<<ZONE>>/machineTypes/<<MACHINE TYPE>>
+    disks:
+      - deviceName: boot
+        type: PERSISTENT
+        boot: true
+        autoDelete: true
+        initializeParams:
+          diskName: <<TO BE CHANGED>>
+          sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20160119
+    networkInterfaces: 
+      - network: $(ref.<<network TO BE CHANGED>>.selfLink)
+        subnetwork: $(ref.<<subnetwork TO BE CHANGED>>.selfLink)
+        accessConfigs:
+        - name: External NAT
+          type: ONE_TO_ONE_NAT

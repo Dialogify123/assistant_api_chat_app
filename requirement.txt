@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+websockets
+python-dotenv
+pymilvus
+openai
+boto3 
+google-cloud-compute 

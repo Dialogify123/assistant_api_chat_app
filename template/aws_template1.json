@@ -1,0 +1,94 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "KeyName": {
+            "Description": "The EC2 Key Pair to allow SSH access to the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "Default":"<<TO BE CHANGED>>"
+        },
+        "VpcCidr": {
+            "Description": "The CIDR block for the VPC",
+            "Type": "String",
+            "Default": "10.0.0.0/16"
+        },
+        "SubnetCidr": {
+            "Description": "The CIDR block for the subnet",
+            "Type": "String",
+            "Default": "10.0.1.0/24"
+        },
+        "InstanceType": {
+            "Description": "The instance type for the EC2 instance",
+            "Type": "String",
+            "Default": "<<MACHINE TYPE>>"
+            
+        },
+        "ImageId": {
+            "Description": "The AMI ID for the EC2 instance",
+            "Type": "AWS::EC2::Image::Id",
+            "Default": "<<TO BE CHANGED>>"
+          
+        }
+    },
+    "Resources": {
+        "MyVPC": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "VpcCidr"
+                },
+                "EnableDnsSupport": true,
+                "EnableDnsHostnames": true
+            }
+        },
+        "MySubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "MyVPC"
+                },
+                "CidrBlock": {
+                    "Ref": "SubnetCidr"
+                }
+            }
+        },
+        "MySecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "MyVPC"
+                },
+                "GroupDescription": "Security Group for My EC2 instance",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+        "MyEC2Instance": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SubnetId": {
+                    "Ref": "MySubnet"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "MySecurityGroup"
+                    }
+                ]
+            }
+        }
+    }
+  }
