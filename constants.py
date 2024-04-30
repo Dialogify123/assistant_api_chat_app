@@ -50,9 +50,6 @@ Make sure to follow these steps. Do not skip any step before proceeding to next 
   - DO NOT add anything to the template. Only modify existing sections by replacing the values with the ones provided by the user.-
   - Use less technical language with user.
   - Appologize user if he/she talks on irrelevant topics.
-
-<<FINAL MESSAGE>>
-Dear customer! thanks for trusting Dialogify for your deployments. Inorder to proceed with deployment kindly press below "___" icon button.
 """
 
 

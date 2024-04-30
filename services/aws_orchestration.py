@@ -1,7 +1,7 @@
 import time
 import boto3
+from json import loads
 from services.orchestrator import Orchestrator
-# from orchestrator import Orchestrator
 
 class AWSOrch(Orchestrator):
     """ AWS Orchestrator class"""
@@ -9,6 +9,7 @@ class AWSOrch(Orchestrator):
     def __init__(self, credentials):
         self.__credentials = credentials
         self.__services = self.validate_get_service()
+
 
     def authenticate(self):
         return boto3.Session(
@@ -36,22 +37,28 @@ class AWSOrch(Orchestrator):
             return False 
 
     def create_vm(self, template:dict, deployment_name:str):
+        template = str(loads(template))
         try:
             response = self.__services.create_stack(
                 StackName=deployment_name,
                 TemplateBody=template,
             )
         except Exception as e:
-            return str(e.args[0])
+            return {"error":str(e.args[0])}
+        
         if self.staging(deployment_name, 'CREATE_COMPLETE'):
-            return "Error occured while staging"
+            events = self.describe_events(deployment_name)['StackEvents']
+            self.__services.delete_stack(StackName=deployment_name)
+            return {    
+                        "error":"Error occur while staging",
+                        "details": [event for event in events if event['ResourceStatus'] == "CREATE_FAILED"]
+                    }
         return response
         
     def staging(self, deployment_name, status):
         try:
             response = self.__services.describe_stacks(StackName=deployment_name)
             while response['Stacks'][0]['StackStatus'] != status:
-                print(response['Stacks'][0]['StackStatus'])
                 if response['Stacks'][0]['StackStatus'] in  ['ROLLBACK_IN_PROGRESS', 'ROLLBACK_COMPLETE']:
                     return True
                 time.sleep(5)
@@ -67,6 +74,10 @@ class AWSOrch(Orchestrator):
                         "region"
                     ]])
 
+    def describe_events(self, deployment_name:str):
+        return self.__services.describe_stack_events(
+            StackName = deployment_name
+        )
 
     def delete_instance(self, deployment_name):
         try:
@@ -74,7 +85,5 @@ class AWSOrch(Orchestrator):
                 StackName=deployment_name,
             )
         except Exception as e:
-            return str(e.args[0])
-        if self.staging(deployment_name, 'DELETE_COMPLETE'):
-            return "Error occured while staging"
+            return {"error":str(e.args[0])}
         return response

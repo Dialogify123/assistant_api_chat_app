@@ -9,14 +9,14 @@ os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
 
 class Assistant:
     
-    def __init__(self, instruction, function_definition, tool):
+    def __init__(self, instruction, function_definitions, tools):
         self.client = OpenAI()
-        self.tool = tool
+        self.tool = tools
         self.assistant = self.client.beta.assistants.create(
             name="Dialogify",
             instructions= instruction,
             model="gpt-4-0125-preview",
-            tools=[function_definition]
+            tools=function_definitions
         )
         self.threads = {}
     
@@ -57,8 +57,10 @@ class Assistant:
     
     def performAction(self, run):
             tool_call = run.required_action.submit_tool_outputs.tool_calls[0]
-            arguments = json.loads(tool_call.function.arguments)
-            return { "tool_call_id": tool_call.id, "output": self.tool(arguments['tags']) }
+            function = tool_call.function
+            function_name = function.name
+            arguments = json.loads(function.arguments)
+            return { "tool_call_id": tool_call.id, "output": self.tools[function_name](**arguments) }
             
     def runAssistant(self, userId, prompt):
         self.createMessage(userId, prompt)

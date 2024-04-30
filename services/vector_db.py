@@ -3,7 +3,6 @@ from pymilvus import MilvusClient
 from openai import OpenAI
 import openai
 
-
 openai.api_key = OPENAI_API_KEY
 
 def getTemplate(tags:list[str]) -> str:
@@ -61,39 +60,3 @@ class VectorDB:
 
 db = VectorDB()
 db.connect()
-
-
-# if __name__=='__main__':
-
-#     TAGS = {
-#         "aws_template1.json" : ['AWS', 'EC2', 'VPC', 'SG'],
-#         "aws_template2.json" : ['AWS', 'EC2', 'VPC', 'SG', 'EBS'],
-#         "aws_template3.json" : ['AWS', 'EC2', 'VPC', 'IGW', 'ELB', 'EFS'],
-#         "azure_template1.json" : ['AZR', 'VM', 'VN'],
-#         "gcp_template1.yaml" : ['GCP', 'COMPUTE', 'VM', 'Network']
-#     }
-
-#     db = VectorDB()
-#     db.connect()
-
-#     for filename, tags in TAGS.items():
-#         db.insertTags(tags, filename)
-
-#     testingTags = [
-#         ['EC2', 'VPC', 'SG'],
-#         ['EC2', 'VPC', 'SG', 'EBS'],
-#         ['EC2', 'VPC', 'IGW', 'ELB', 'EFS'],
-#         ['VM', 'VN'],
-#         ['VM', 'Network'],
-#         ['EC2'],
-#         ['VPC', 'SG'],
-#         ['IGW', 'ELB', 'EFS'],
-#         ['VN'],
-#         ['Network'],
-#         ['GCP'],
-#         ['COMPUTE']
-#     ]
-
-#     for tags in testingTags:
-#         print(tags, ':', db.searchFile(tags))
-      
