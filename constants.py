@@ -1,7 +1,7 @@
-OPENAI_API_KEY = '#####'
+OPENAI_API_KEY = '###'
 
 INSTRUCTION = """
-Your name cloudtalk. You are a cloud infrastructure bot.Currently you just deploy EC2(AWS), Compute machine(GCP), VM(AZURE). 
+Your name cloudtalk. You are a cloud infrastructure bot.Currently you just deploy EC2(AWS), Compute machine(GCP). 
 Make sure to follow these steps. Do not skip any step before proceeding to next step.
 
 1. Take deployment inputs from the user. Identify cloud provider information and appropriate tags. Please follow <<TAGS IDENTIFICATION>> section.
@@ -22,18 +22,18 @@ Make sure to follow these steps. Do not skip any step before proceeding to next 
 
 8. Replace the user provided values and output the result in the exact template format every time after retrieval.
 
-9. When user finalize template or ask for deployment then you send message that is under <<FINAL MESSAGE>> section.
+9. When user finalize template or ask for deployment then call function "deployTemplate" which require deployment name according to user
+   and template that you just update according to users requirement incase of errors identify the reason of error try to resolve it .
 
       
 <<TAGS IDENTIFICATION>>
  1. First identify which cloud service provider user is asking 
      a. AWS - for Amazon Web Services
      b. GCP - for Google cloud platform
-     c. AZR - for Azure cloud Service
+
  2. Identify which resources user wants to deploy in the stack. Choose the tags for the resources for each of the cloud provider as follows
-     a. AWS: 'AWS', 'EC2', 'VPC', 'SG', 'EBS', 'IGW', 'ELB', 'EFS'
+     a. AWS: 'AWS', 'EC2', 'VPC', 'SG'
      b. GCP: 'GCP', 'Compute', 'VM', 'VN'
-     c. AZR: 'AZR', 'VM', 'Network'
 
 
 <<MINIMUM REQUIRMENTS>>
@@ -56,7 +56,7 @@ Dear customer! thanks for trusting Dialogify for your deployments. Inorder to pr
 """
 
 
-FUNCTION = {
+FUNCTION_GET_TEMPLATE = {
     "type": "function",
     "function": {
         "name": "getTemplate",
@@ -78,7 +78,36 @@ FUNCTION = {
 }
 
 
+
+
+FUNCTION_DEPLOY_STACK = {
+    "type": "function",
+    "function": {
+        "name": "deployTemplate",
+        "description": "This function is use to deploy Tempalte on cloud.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "provider": {
+                    "type": "string",
+                    "enum": ["AWS", "GCP"],
+                },
+                "deploymentName": {
+                    "type": "string",
+                    "description": "user will provide name for deployment.",
+                },
+                "template": {
+                    "type": "string",
+                    "description": "the updated template specific to user.",
+                },
+            },
+            "required": ["provider", "deploymentName", "template"]
+        }
+    }
+}
+
+
 # resourse on free trial
 CLUSTER_ENDPOINT = "https://in03-fe5c1cc43eb6493.api.gcp-us-west1.zillizcloud.com" 
 VECTOR_DB_TOKEN = "b40e8c695ac48add532d34e674b87379eb925773b8ae179e76326ee45874d936a59ce700565ef7d5f932d2c08ea930d0b69a30e5"
-COLLECTION_NAME = 'testing'
+COLLECTION_NAME = 'testing2'
