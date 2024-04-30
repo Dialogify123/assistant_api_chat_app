@@ -22,10 +22,3 @@ def credentials_mapping(credentials):
                 "access_key": credentials.private_key_id,
                 "secret_access_key": credentials.private_key,
             }
-        case "AZR":
-            return {
-                "client_id": credentials.client_id,
-                "tenant_id": credentials.auth_uri,
-                "subscription_id": credentials.auth_uri,
-                "client_secret": credentials.client_url,
-            }

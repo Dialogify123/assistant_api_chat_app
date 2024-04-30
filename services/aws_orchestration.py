@@ -48,10 +48,11 @@ class AWSOrch(Orchestrator):
         
         if self.staging(deployment_name, 'CREATE_COMPLETE'):
             events = self.describe_events(deployment_name)['StackEvents']
+            print(events)
             self.__services.delete_stack(StackName=deployment_name)
             return {    
                         "error":"Error occur while staging",
-                        "details": [event for event in events if event['ResourceStatus'] == "CREATE_FAILED"]
+                        "details": [event for event in events if event['ResourceStatus'] == "CREATE_FAILED" or event['ResourceStatus'] == "ROLLBACK_IN_PROGRESS" or event['ResourceStatus'] == "ROLLBACK_COMPLETE"]
                     }
         return response
         
@@ -86,4 +87,3 @@ class AWSOrch(Orchestrator):
             )
         except Exception as e:
             return {"error":str(e.args[0])}
-        return response

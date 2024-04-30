@@ -15,7 +15,7 @@ class GenericCredentials(BaseModel):
     type : str
     project_id: str
     private_key_id: str
-    private_key: str
+    private_key: str 
     client_email: str
     client_id: str
     auth_uri: str
@@ -29,19 +29,16 @@ app = FastAPI()
 USER_SESSIONS = {}
 
 
-def validate(function):
-    def wrapper(**kwagrs):
-        if kwagrs["provider"] in USER_SESSIONS:
-            return function(**kwagrs)
-        return {
-            "error": f"First create session for {kwagrs['provider']}"
-        }
-    return wrapper
 
-@validate
-def deployTemplate(provider:str, deploymentName:str, template:str):
+def deployTemplate(provider:str='', deploymentName:str='', template:str=''):
+    print(provider, deploymentName, template)
+    print(USER_SESSIONS)
+    if provider not in USER_SESSIONS:
+        return str({
+            "error": f"First create session for {provider}"
+        })
     orchestrator = USER_SESSIONS[provider]
-    return orchestrator.create_vm(template, deploymentName)
+    return str(orchestrator.create_vm(template, deploymentName))
 
 tools = {
     "getTemplate" : getTemplate,
@@ -67,7 +64,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(SessionMiddleware, secret_key="secret-d")
+
 
 @app.post("/session")
 async def createSession(credentials: GenericCredentials):

@@ -11,11 +11,11 @@ class Assistant:
     
     def __init__(self, instruction, function_definitions, tools):
         self.client = OpenAI()
-        self.tool = tools
+        self.tools = tools
         self.assistant = self.client.beta.assistants.create(
-            name="Dialogify",
+            name="Cloudtalk",
             instructions= instruction,
-            model="gpt-4-0125-preview",
+            model="gpt-4-turbo",
             tools=function_definitions
         )
         self.threads = {}
@@ -47,6 +47,7 @@ class Assistant:
               thread_id=self.threads[userId].id,
               run_id=run.id
             )
+            print(run.status)
             if run.status == 'requires_action':
                 # tool_call = run.required_action.submit_tool_outputs.tool_calls[0]
                 run = self.client.beta.threads.runs.submit_tool_outputs(
@@ -60,6 +61,7 @@ class Assistant:
             function = tool_call.function
             function_name = function.name
             arguments = json.loads(function.arguments)
+            print(function_name)
             return { "tool_call_id": tool_call.id, "output": self.tools[function_name](**arguments) }
             
     def runAssistant(self, userId, prompt):

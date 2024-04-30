@@ -5,7 +5,7 @@ import openai
 
 openai.api_key = OPENAI_API_KEY
 
-def getTemplate(tags:list[str]) -> str:
+def getTemplate(tags:list[str]=[]) -> str:
     filename = db.searchFile(tags)
     with open(f"template\\{filename}","r") as f:
         return f.read()
