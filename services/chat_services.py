@@ -18,40 +18,40 @@ class Assistant:
             model="gpt-4-turbo",
             tools=function_definitions
         )
-        self.threads = {}
+        self.thread = None
     
-    def createThread(self, userId):
+    def createThread(self):
         thread = self.client.beta.threads.create()
-        self.threads[userId] = thread
+        self.thread = thread
     
-    def deleteThread(self, userId):
-        self.threads.pop(userId)
+    def deleteThread(self):
+        self.thread = None
     
-    def createMessage(self, userId, prompt = ""):
+    def createMessage(self, prompt = ""):
         return self.client.beta.threads.messages.create(
-            thread_id=self.threads[userId].id,
+            thread_id=self.thread.id,
             role="user",
             content=prompt
         )
     
-    def runn(self, userId):
+    def runn(self):
         run = self.client.beta.threads.runs.create(
-          thread_id=self.threads[userId].id,
+          thread_id=self.thread.id,
           assistant_id=self.assistant.id,
         )
         return run
     
-    def checkstatus(self, run, userId):
+    def checkstatus(self, run):
         while run.status != 'completed':       
             run = self.client.beta.threads.runs.retrieve(
-              thread_id=self.threads[userId].id,
+              thread_id=self.thread.id,
               run_id=run.id
             )
             print(run.status)
             if run.status == 'requires_action':
                 # tool_call = run.required_action.submit_tool_outputs.tool_calls[0]
                 run = self.client.beta.threads.runs.submit_tool_outputs(
-                    thread_id=self.threads[userId].id,
+                    thread_id=self.thread.id,
                     run_id=run.id,
                     tool_outputs=[self.performAction(run)],
                 )
@@ -64,11 +64,11 @@ class Assistant:
             print(function_name)
             return { "tool_call_id": tool_call.id, "output": self.tools[function_name](**arguments) }
             
-    def runAssistant(self, userId, prompt):
-        self.createMessage(userId, prompt)
-        run = self.runn(userId)
-        self.checkstatus(run, userId)
+    def runAssistant(self, prompt):
+        self.createMessage( prompt)
+        run = self.runn()
+        self.checkstatus(run)
         messages = self.client.beta.threads.messages.list(
-            thread_id=self.threads[userId].id
+            thread_id=self.thread.id
         )
         return messages.data[0].content[0].text.value

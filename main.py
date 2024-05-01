@@ -2,13 +2,21 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import WebSocket, WebSocketDisconnect, HTTPException, status
-from constants import INSTRUCTION, FUNCTION_GET_TEMPLATE,FUNCTION_DEPLOY_STACK
+from constants import INSTRUCTION, FUNCTION_GET_TEMPLATE,FUNCTION_DEPLOY_STACK , OPENAI_API_KEY
 from services import chat_services
 from services.vector_db import getTemplate
 from pydantic import BaseModel
 from services.aws_orchestration import AWSOrch
 from services.gcp_orchestration import GCPOrch
 from utils.credentials_mapping import credentials_mapping
+import os
+from trulens_eval import Feedback, OpenAI as fOpenAI, Tru
+from trulens_eval import TruBasicApp
+
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+
+tru = Tru()
+tru.reset_database()
 
 class GenericCredentials(BaseModel):
     provider : str
@@ -51,6 +59,9 @@ function_definitions = [
 
 ASSISTANT = chat_services.Assistant(INSTRUCTION, function_definitions, tools)
 
+fopenai = fOpenAI()
+f_answer_relevance = Feedback(fopenai.relevance).on_input_output()
+tru_llm_standalone_recorder = TruBasicApp(ASSISTANT.runAssistant, app_id="Dialogify123", feedbacks=[f_answer_relevance])
 
 origins = [
     '*'
@@ -89,13 +100,17 @@ async def createSession(credentials: GenericCredentials):
 async def websocket_endpoint(websocket: WebSocket):
     try:
         await websocket.accept()
-        ASSISTANT.createThread(userId=1)
+        ASSISTANT.createThread()
         try:
             while True:
                 data = await websocket.receive_text()
-                system_response = ASSISTANT.runAssistant(1, data)
+                with tru_llm_standalone_recorder as recording:
+                    tru_llm_standalone_recorder.app(data)
+                    system_response = ASSISTANT.runAssistant(data)
                 await websocket.send_text(system_response)
         except WebSocketDisconnect:
-            ASSISTANT.deleteThread(1)
+            ASSISTANT.deleteThread()
     except:
         pass
+
+tru.run_dashboard()
