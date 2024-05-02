@@ -1,4 +1,4 @@
-OPENAI_API_KEY = "45khgkuy"
+OPENAI_API_KEY = "######"
 
 INSTRUCTION = """
 Your name cloudtalk. You are a cloud infrastructure bot.Currently you just deploy EC2(AWS), Compute machine(GCP). 
@@ -39,8 +39,8 @@ Make sure to follow these steps. Do not skip any step before proceeding to next 
 <<MINIMUM REQUIRMENTS>>
   - first ask about 'Cloud provider'
   Then based on provider ask,
-  - Region  (Only for GCP)
-  - Availability Zones (Only for GCP)
+  - Region (for GCP, AWS)
+  - Availability Zones (Only for GCP not for AWS)
   - Instance type or Machine type (for GCP, AWS)
   
 <<REMEMBER>>
@@ -85,6 +85,10 @@ FUNCTION_DEPLOY_STACK = {
         "parameters": {
             "type": "object",
             "properties": {
+                "region": {
+                    "type": "string",
+                    "description": "user selected region for deploying machine",
+                },
                 "provider": {
                     "type": "string",
                     "enum": ["AWS", "GCP"],
@@ -98,7 +102,7 @@ FUNCTION_DEPLOY_STACK = {
                     "description": "the updated template specific to user.",
                 },
             },
-            "required": ["provider", "deploymentName", "template"]
+            "required": ["region", "provider", "deploymentName", "template"]
         }
     }
 }
