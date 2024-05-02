@@ -12,7 +12,8 @@ from utils.credentials_mapping import credentials_mapping
 import os
 from trulens_eval import Feedback, OpenAI as fOpenAI, Tru
 from trulens_eval import TruBasicApp
-
+from trulens_eval.app import App
+# from trulens_eval.feedback.provider.openai import OpenAI as f2OpenAI
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 tru = Tru()
@@ -58,10 +59,10 @@ function_definitions = [
     ]
 
 ASSISTANT = chat_services.Assistant(INSTRUCTION, function_definitions, tools)
-
 fopenai = fOpenAI()
 f_answer_relevance = Feedback(fopenai.relevance).on_input_output()
-tru_llm_standalone_recorder = TruBasicApp(ASSISTANT.runAssistant, app_id="Dialogify123", feedbacks=[f_answer_relevance])
+f_context_relavance = Feedback(fopenai.relevance_with_cot_reasons).on_input_output()
+tru_llm_standalone_recorder = TruBasicApp(ASSISTANT.runAssistant, app_id="Dialogify123", feedbacks=[f_answer_relevance,f_context_relavance])
 
 origins = [
     '*'
@@ -105,8 +106,7 @@ async def websocket_endpoint(websocket: WebSocket):
             while True:
                 data = await websocket.receive_text()
                 with tru_llm_standalone_recorder as recording:
-                    tru_llm_standalone_recorder.app(data)
-                    system_response = ASSISTANT.runAssistant(data)
+                    system_response = tru_llm_standalone_recorder.app(data)
                 await websocket.send_text(system_response)
         except WebSocketDisconnect:
             ASSISTANT.deleteThread()
