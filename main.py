@@ -1,16 +1,16 @@
+import os
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import WebSocket, WebSocketDisconnect, HTTPException, status
-from constants import INSTRUCTION, FUNCTION_GET_TEMPLATE,FUNCTION_DEPLOY_STACK , OPENAI_API_KEY
-from services import chat_services
-from services.vector_db import getTemplate
 from pydantic import BaseModel
+from services import chat_services
+from trulens_eval import TruBasicApp
+from services.vector_db import getTemplate
 from services.aws_orchestration import AWSOrch
 from services.gcp_orchestration import GCPOrch
+from fastapi.middleware.cors import CORSMiddleware
 from utils.credentials_mapping import credentials_mapping
-import os
 from trulens_eval import Feedback, OpenAI as fOpenAI, Tru
-from trulens_eval import TruBasicApp
+from fastapi import WebSocket, WebSocketDisconnect, HTTPException, status
+from constants import INSTRUCTION, FUNCTION_GET_TEMPLATE,FUNCTION_DEPLOY_STACK , OPENAI_API_KEY
 
 
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY

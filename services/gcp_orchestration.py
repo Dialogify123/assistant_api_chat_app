@@ -2,7 +2,6 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from googleapiclient.errors import HttpError
 from services.orchestrator import Orchestrator
-# from orchestrator import Orchestrator
 import time
 
 class GCPOrch(Orchestrator):
@@ -34,8 +33,7 @@ class GCPOrch(Orchestrator):
         except HttpError as e:
             return False if e.error_details[0]['reason'] == 'notFound' else True
 
-    def create_vm(self,  template:dict, deployment_name:str):
-
+    def create_vm(self,  template:str, deployment_name:str):
         project = self.__credentials['project_id']
         if self.vm_exist(project, deployment_name):
             return "Already exist"
@@ -94,7 +92,6 @@ class GCPOrch(Orchestrator):
                         "client_x509_cert_url",
                         "universe_domain"
                     ]])
-
 
     def delete_instance(self, deployment_name):
         project = self.__credentials['project_id']

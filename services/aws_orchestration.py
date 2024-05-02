@@ -36,7 +36,7 @@ class AWSOrch(Orchestrator):
         except:
             return False 
 
-    def create_vm(self, template:dict, deployment_name:str):
+    def create_vm(self, template:str, deployment_name:str):
         template = str(loads(template))
         try:
             response = self.__services.create_stack(
