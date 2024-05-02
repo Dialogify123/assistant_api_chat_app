@@ -2,6 +2,7 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from googleapiclient.errors import HttpError
 from services.orchestrator import Orchestrator
+# from orchestrator import Orchestrator
 import time
 
 class GCPOrch(Orchestrator):
@@ -44,11 +45,21 @@ class GCPOrch(Orchestrator):
             )
         try:
             response = request.execute()
+            
+            # CONDITION FOR ERROR DURING DEPLOYMENT.
+            # if self.check_status(deployment_name):
+            #     print("Error occured during this deployment")
+
         except HttpError as e:
             return e.error_details[0]['message']
         
         if self.staging(project,deployment_name):
             return "Error occur while staging."
+        error = self.check_status(deployment_name) 
+        if error:
+            print("Error occured during this deployment")
+            return error
+                # print("Error occured during this deployment")
         return response
         # return f"VM instance created: {response['selfLink']}"
         
@@ -58,6 +69,7 @@ class GCPOrch(Orchestrator):
                 project=project,
                 deployment = deployment_name
             ).execute()
+            # print('staging try: ', instStatus)
             while instStatus['operation']['status'] != 'DONE':
                 time.sleep(5)
                 instStatus = self.__services.deployments().get(
@@ -96,4 +108,21 @@ class GCPOrch(Orchestrator):
                 return e.error_details[0]['message']
             return "Delete"
         return "Does not exist"
+    
+    def check_status(self, deployment_name):
+        project = self.__credentials['project_id']
+        if self.vm_exist( project, deployment_name):
+            try:
+                response = self.__services.deployments().get(
+                    project=project,
+                    deployment = deployment_name
+                ).execute()
+                
+                if response['operation']['error']['errors']:
+                    print(response['operation']['error']['errors'])
+                    return response['operation']['error']['errors']
 
+            except HttpError as e:
+                return e.error_details[0]['message']
+            return False
+        return False
