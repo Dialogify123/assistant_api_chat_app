@@ -1,4 +1,4 @@
-OPENAI_API_KEY = "######"
+OPENAI_API_KEY = "#####"
 
 INSTRUCTION = """
 Your name cloudtalk. You are a cloud infrastructure bot.Currently you just deploy EC2(AWS), Compute machine(GCP). 
