@@ -35,8 +35,19 @@ class GCPOrch(Orchestrator):
 
     def create_vm(self,  template:str, deployment_name:str):
         project = self.__credentials['project_id']
-        if self.vm_exist(project, deployment_name):
-            return "Already exist"
+        # if self.vm_exist(project, deployment_name):
+        #     return "Already exist"
+        # import yaml
+        
+        # template = yaml.dump(eval(str(yaml.safe_load(template))))
+        template = {
+        'name': deployment_name,
+        'target': {
+            'config': {
+                'content': template
+            }
+        }
+    }
         request = self.__services.deployments().insert(
             project=project, 
             body=template
@@ -53,10 +64,10 @@ class GCPOrch(Orchestrator):
         
         if self.staging(project,deployment_name):
             return "Error occur while staging."
-        error = self.check_status(deployment_name) 
-        if error:
-            print("Error occured during this deployment")
-            return error
+        # # error = self.check_status(deployment_name) 
+        # if error:
+        #     print("Error occured during this deployment")
+        #     return error
                 # print("Error occured during this deployment")
         return response
         # return f"VM instance created: {response['selfLink']}"

@@ -47,7 +47,8 @@ def deployTemplate(region:str = "", provider:str='', deploymentName:str='', temp
     if not USER_SESSIONS[provider][1]:
         USER_SESSIONS[provider][0]['region'] = region
         USER_SESSIONS[provider][1] = AWSOrch(credentials=USER_SESSIONS[provider][0])
-    orchestrator = USER_SESSIONS[provider]
+    orchestrator = USER_SESSIONS[provider][1]
+    print(template)
     return str(orchestrator.create_vm(template, deploymentName))
 
 
@@ -91,6 +92,7 @@ app.add_middleware(
 @app.post("/session")
 async def createSession(credentials: GenericCredentials):
     mappedCerdentials = credentials_mapping(credentials)
+    print(mappedCerdentials)
     match credentials.provider:
         case "GCP":
             try:
